@@ -2,15 +2,16 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { EmailWithPrediction } from "@/lib/gmail";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { EmailList } from "@/components/dashboard/EmailList";
 import { EmailViewer } from "@/components/dashboard/EmailViewer";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getApiUrl } from "@/lib/settings";
 
 type FilterType = "all" | "phishing" | "safe";
 
@@ -29,6 +30,15 @@ export default function DashboardPage() {
   const [displayCount, setDisplayCount] = useState(5);
   const [analyzedIds, setAnalyzedIds] = useState<Set<string>>(new Set());
   const [analyzingBatch, setAnalyzingBatch] = useState(false);
+  const [apiUrl, setApiUrl] = useState<string | null>(null);
+
+  const refreshApiUrl = useCallback(() => {
+    setApiUrl(getApiUrl());
+  }, []);
+
+  useEffect(() => {
+    refreshApiUrl();
+  }, [refreshApiUrl]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -43,6 +53,16 @@ export default function DashboardPage() {
   }, [status]);
 
   const fetchEmails = async (refresh: boolean = false) => {
+    const currentApiUrl = getApiUrl();
+    
+    if (!currentApiUrl) {
+      setError("API URL not configured. Please click the Settings button and enter your FastAPI URL.");
+      setLoading(false);
+      return;
+    }
+    
+    setApiUrl(currentApiUrl);
+    
     try {
       if (refresh) {
         setLoading(true);
@@ -84,10 +104,13 @@ export default function DashboardPage() {
   const analyzeEmailBatch = async (emailsToAnalyze: any[]) => {
     if (emailsToAnalyze.length === 0) return;
     
+    const currentApiUrl = getApiUrl();
+    if (!currentApiUrl) return;
+    
     try {
       setAnalyzingBatch(true);
       
-      const response = await fetch("/api/analyze-batch", {
+      const response = await fetch(`/api/analyze-batch?apiUrl=${encodeURIComponent(currentApiUrl)}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -199,6 +222,7 @@ export default function DashboardPage() {
         user={session?.user} 
         onRefresh={() => fetchEmails(true)}
         onMenuClick={() => setMobileMenuOpen(true)}
+        onSettingsChange={refreshApiUrl}
       />
       
       <div className="flex flex-1 overflow-hidden">

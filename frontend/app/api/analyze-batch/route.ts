@@ -2,15 +2,6 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 
-const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-interface AnalyzeEmailRequest {
-  message_id: string;
-  subject: string;
-  from: string;
-  body: string;
-}
-
 interface AnalyzeEmailResponse {
   label: "phishing" | "legitimate";
   confidence: number;
@@ -18,18 +9,27 @@ interface AnalyzeEmailResponse {
   phishing_type: string | null;
 }
 
-async function analyzeEmail(email: AnalyzeEmailRequest): Promise<AnalyzeEmailResponse> {
+function calculateSeverity(confidence: number): "low" | "medium" | "high" {
+  if (confidence >= 0.9) return "high";
+  if (confidence >= 0.7) return "medium";
+  return "low";
+}
+
+async function analyzeEmail(
+  email: { message_id: string; subject: string; from: string; body: string },
+  apiUrl: string
+): Promise<AnalyzeEmailResponse> {
   try {
-    const response = await fetch(`${FASTAPI_URL}/analyze-email`, {
+    const text = `${email.subject} ${email.body}`.trim();
+
+    const response = await fetch(`${apiUrl}/predict`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message_id: email.message_id,
-        subject: email.subject,
-        from_: email.from,
-        body: email.body,
+        text: text,
+        model: "phishing",
       }),
     });
 
@@ -37,10 +37,19 @@ async function analyzeEmail(email: AnalyzeEmailRequest): Promise<AnalyzeEmailRes
       throw new Error(`FastAPI returned ${response.status}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+
+    const label = result.prediction?.toLowerCase() === "phishing" ? "phishing" : "legitimate";
+    const confidence = typeof result.confidence === "number" ? result.confidence : 0.5;
+
+    return {
+      label,
+      confidence: Math.round(confidence * 10000) / 10000,
+      severity: calculateSeverity(confidence),
+      phishing_type: null,
+    };
   } catch (error) {
     console.error("Error calling FastAPI:", error);
-    // Return a default prediction if analysis fails
     return {
       label: "legitimate",
       confidence: 0.5,
@@ -61,6 +70,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const apiUrl = searchParams.get("apiUrl");
+
+    if (!apiUrl) {
+      return NextResponse.json(
+        { error: "API URL not configured. Please set it in Settings." },
+        { status: 400 }
+      );
+    }
+
     const { emails } = await request.json();
 
     if (!Array.isArray(emails) || emails.length === 0) {
@@ -70,15 +89,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // Analyze each email with BERT
     const analyzedEmails = await Promise.all(
       emails.map(async (email: any) => {
-        const prediction = await analyzeEmail({
-          message_id: email.id,
-          subject: email.subject,
-          from: email.from,
-          body: email.body,
-        });
+        const prediction = await analyzeEmail(
+          {
+            message_id: email.id,
+            subject: email.subject,
+            from: email.from,
+            body: email.body,
+          },
+          apiUrl
+        );
 
         return {
           id: email.id,

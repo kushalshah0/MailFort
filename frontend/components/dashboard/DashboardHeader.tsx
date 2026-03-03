@@ -3,9 +3,10 @@
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Shield, RefreshCw, LogOut, Menu } from "lucide-react";
+import { Shield, RefreshCw, LogOut, Menu, Settings } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SettingsModal } from "./SettingsModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +20,12 @@ interface DashboardHeaderProps {
   user: any;
   onRefresh: () => Promise<void>;
   onMenuClick?: () => void;
+  onSettingsChange?: () => void;
 }
 
-export function DashboardHeader({ user, onRefresh, onMenuClick }: DashboardHeaderProps) {
+export function DashboardHeader({ user, onRefresh, onMenuClick, onSettingsChange }: DashboardHeaderProps) {
   const [refreshing, setRefreshing] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -60,6 +63,16 @@ export function DashboardHeader({ user, onRefresh, onMenuClick }: DashboardHeade
         <div className="flex items-center gap-2">
           {/* Theme Toggle */}
           <ThemeToggle />
+
+          {/* Settings Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSettingsOpen(true)}
+            title="API Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </Button>
 
           {/* Refresh Button */}
           <Button
@@ -112,6 +125,8 @@ export function DashboardHeader({ user, onRefresh, onMenuClick }: DashboardHeade
           </DropdownMenu>
         </div>
       </div>
+
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} onUrlChange={onSettingsChange} />
     </header>
   );
 }
