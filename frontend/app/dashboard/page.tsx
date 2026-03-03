@@ -11,7 +11,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getApiUrl } from "@/lib/settings";
+import { getApiUrl, getApiModel } from "@/lib/settings";
 
 type FilterType = "all" | "phishing" | "safe";
 
@@ -31,9 +31,11 @@ export default function DashboardPage() {
   const [analyzedIds, setAnalyzedIds] = useState<Set<string>>(new Set());
   const [analyzingBatch, setAnalyzingBatch] = useState(false);
   const [apiUrl, setApiUrl] = useState<string | null>(null);
+  const [apiModel, setApiModel] = useState<string>("bert");
 
   const refreshApiUrl = useCallback(() => {
     setApiUrl(getApiUrl());
+    setApiModel(getApiModel());
   }, []);
 
   useEffect(() => {
@@ -53,16 +55,6 @@ export default function DashboardPage() {
   }, [status]);
 
   const fetchEmails = async (refresh: boolean = false) => {
-    const currentApiUrl = getApiUrl();
-    
-    if (!currentApiUrl) {
-      setError("API URL not configured. Please click the Settings button and enter your FastAPI URL.");
-      setLoading(false);
-      return;
-    }
-    
-    setApiUrl(currentApiUrl);
-    
     try {
       if (refresh) {
         setLoading(true);
@@ -74,7 +66,6 @@ export default function DashboardPage() {
       }
       setError(null);
       
-      // Step 1: Fetch metadata only (fast)
       const response = await fetch("/api/emails/metadata?maxResults=30");
       
       if (!response.ok) {
@@ -83,16 +74,12 @@ export default function DashboardPage() {
       
       const data = await response.json();
       
-      // Set emails without predictions first
       setEmails(data.emails.map((email: any) => ({
         ...email,
         prediction: null
       })));
       
       setLoading(false);
-      
-      // Step 2: Analyze first 5 emails in background
-      analyzeEmailBatch(data.emails.slice(0, 5));
       
     } catch (err) {
       console.error("Error fetching emails:", err);
@@ -105,12 +92,13 @@ export default function DashboardPage() {
     if (emailsToAnalyze.length === 0) return;
     
     const currentApiUrl = getApiUrl();
+    const currentApiModel = getApiModel();
     if (!currentApiUrl) return;
     
     try {
       setAnalyzingBatch(true);
       
-      const response = await fetch(`/api/analyze-batch?apiUrl=${encodeURIComponent(currentApiUrl)}`, {
+      const response = await fetch(`/api/analyze-batch?apiUrl=${encodeURIComponent(currentApiUrl)}&model=${encodeURIComponent(currentApiModel)}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -154,21 +142,8 @@ export default function DashboardPage() {
   };
 
   const handleLoadMore = () => {
-    setLoadingMore(true);
-    
     const newDisplayCount = displayCount + 5;
     setDisplayCount(newDisplayCount);
-    
-    // Get the next 5 emails that haven't been analyzed yet
-    const nextBatch = emails
-      .slice(displayCount, newDisplayCount)
-      .filter(email => !analyzedIds.has(email.id));
-    
-    if (nextBatch.length > 0) {
-      analyzeEmailBatch(nextBatch);
-    }
-    
-    setLoadingMore(false);
   };
 
   const filteredEmails = emails.filter((email) => {
@@ -185,9 +160,46 @@ export default function DashboardPage() {
     setSelectedEmail(email);
     setShowEmailViewer(true);
     
-    // If this email hasn't been analyzed yet, analyze it now
-    if (!analyzedIds.has(email.id) && !email.prediction) {
-      analyzeEmailBatch([email]);
+    // Analyze the email to get SHAP values
+    const currentApiUrl = getApiUrl();
+    const currentApiModel = getApiModel();
+    
+    console.log("API URL:", currentApiUrl);
+    console.log("API Model:", currentApiModel);
+    
+    if (!currentApiUrl) {
+      console.log("No API URL configured");
+      return;
+    }
+    
+    // Always analyze when clicking (for SHAP values)
+    const response = await fetch(`/api/analyze-batch?apiUrl=${encodeURIComponent(currentApiUrl)}&model=${encodeURIComponent(currentApiModel)}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ emails: [email] }),
+    });
+    
+    if (response.ok) {
+      const { results } = await response.json();
+      const prediction = results[0]?.prediction;
+      
+      console.log("Prediction result:", prediction);
+      
+      setEmails(prevEmails => {
+        const index = prevEmails.findIndex(e => e.id === email.id);
+        if (index !== -1) {
+          const updated = [...prevEmails];
+          updated[index] = { ...updated[index], prediction };
+          return updated;
+        }
+        return prevEmails;
+      });
+      
+      setSelectedEmail(prev => prev ? { ...prev, prediction } : null);
+    } else {
+      console.error("Analysis failed:", response.status);
     }
   };
 

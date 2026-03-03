@@ -12,13 +12,21 @@ export interface Email {
   labels: string[];
 }
 
+export interface TokenScore {
+  token: string;
+  shap_score: number;
+}
+
+export interface Prediction {
+  label: "phishing" | "legitimate";
+  confidence: number;
+  severity: "low" | "medium" | "high";
+  phishing_type: string | null;
+  top_tokens?: TokenScore[];
+}
+
 export interface EmailWithPrediction extends Email {
-  prediction?: {
-    label: "phishing" | "legitimate";
-    confidence: number;
-    severity: "low" | "medium" | "high";
-    phishing_type: string | null;
-  };
+  prediction?: Prediction | null;
 }
 
 export async function getGmailClient(accessToken: string) {

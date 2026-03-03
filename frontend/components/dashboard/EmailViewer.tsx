@@ -11,8 +11,10 @@ import {
   ShieldCheck,
   Mail,
   X,
+  Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { ShapAnalysis } from "./ShapAnalysis";
 
 interface EmailViewerProps {
   email: EmailWithPrediction | null;
@@ -27,6 +29,7 @@ export function EmailViewer({ email, onBack }: EmailViewerProps) {
   const isPhishing = email.prediction?.label === "phishing";
   const confidence = email.prediction?.confidence || 0;
   const severity = email.prediction?.severity || "low";
+  const hasAnalysis = !!email.prediction;
 
   return (
     <div className="flex-1 bg-gray-50 dark:bg-gray-900 flex flex-col h-full">
@@ -59,7 +62,16 @@ export function EmailViewer({ email, onBack }: EmailViewerProps) {
             label={email.prediction?.label}
             confidence={confidence}
             severity={severity}
+            isAnalyzing={!hasAnalysis}
           />
+
+          {/* SHAP Analysis - Only show if analyzed */}
+          {hasAnalysis && (
+            <ShapAnalysis
+              topTokens={email.prediction?.top_tokens}
+              label={email.prediction?.label || "legitimate"}
+            />
+          )}
 
           {/* Email Header */}
           <Card className="p-3 sm:p-4 md:p-6 overflow-hidden">
@@ -112,11 +124,30 @@ interface PredictionCardProps {
   label?: string;
   confidence: number;
   severity: string;
+  isAnalyzing?: boolean;
 }
 
-function PredictionCard({ label, confidence, severity }: PredictionCardProps) {
+function PredictionCard({ label, confidence, severity, isAnalyzing }: PredictionCardProps) {
   const isPhishing = label === "phishing";
   const percentage = Math.round(confidence * 100);
+
+  if (isAnalyzing) {
+    return (
+      <Card className="p-6 bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-300 dark:border-gray-600">
+        <div className="flex items-center justify-center space-x-3">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+          <div>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Analyzing email...
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Running ML model to detect phishing
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   if (isPhishing) {
     const severityConfig = {
@@ -157,7 +188,7 @@ function PredictionCard({ label, confidence, severity }: PredictionCardProps) {
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
                 <h3 className={`text-lg font-bold ${config.textColor}`}>
-                  ⚠️ Phishing Detected
+                  Phishing Detected
                 </h3>
                 <Badge
                   className={`${config.bgColor} ${config.textColor} border ${config.borderColor} uppercase font-bold`}
@@ -214,9 +245,9 @@ function PredictionCard({ label, confidence, severity }: PredictionCardProps) {
 
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-bold text-green-700 dark:text-green-300">
-                ✓ Email Verified Safe
-              </h3>
+                <h3 className="text-lg font-bold text-green-700 dark:text-green-300">
+                  Email Verified Safe
+                </h3>
               <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
                 LEGITIMATE
               </Badge>

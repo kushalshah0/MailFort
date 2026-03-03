@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, Save, AlertCircle, Server, ExternalLink, CheckCircle2, X } from "lucide-react";
+import { Settings, Save, AlertCircle, Server, ExternalLink, CheckCircle2, X, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getApiUrl, setApiUrl, clearApiUrl } from "@/lib/settings";
+import { getApiUrl, setApiUrl, clearApiSettings, getApiModel, setApiModel, ModelType } from "@/lib/settings";
 
 interface SettingsModalProps {
   open: boolean;
@@ -18,21 +18,29 @@ interface SettingsModalProps {
   onUrlChange?: () => void;
 }
 
+const MODELS: { value: ModelType; label: string }[] = [
+  { value: "bert", label: "BERT" },
+  { value: "lstm", label: "LSTM" },
+  { value: "gru", label: "GRU" },
+];
+
 export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModalProps) {
   const [apiUrl, setApiUrlState] = useState("");
+  const [apiModel, setApiModelState] = useState<ModelType>("bert");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const url = getApiUrl();
-    if (url) {
-      setApiUrlState(url);
-    }
+    const model = getApiModel();
+    if (url) setApiUrlState(url);
+    setApiModelState(model);
   }, [open]);
 
   const handleSave = () => {
-    const trimmedUrl = apiUrl.trim();
+    const trimmedUrl = apiUrl.trim().replace(/\/$/, "");
     if (trimmedUrl) {
       setApiUrl(trimmedUrl);
+      setApiModel(apiModel);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       if (onUrlChange) onUrlChange();
@@ -41,7 +49,8 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
 
   const handleClear = () => {
     setApiUrlState("");
-    clearApiUrl();
+    setApiModelState("bert");
+    clearApiSettings();
     if (onUrlChange) onUrlChange();
   };
 
@@ -85,6 +94,27 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
             )}
           </div>
 
+          <div className="space-y-3">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Cpu className="w-4 h-4" />
+              ML Model
+            </label>
+            <select
+              value={apiModel}
+              onChange={(e) => setApiModelState(e.target.value as ModelType)}
+              className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {MODELS.map((model) => (
+                <option key={model.value} value={model.value}>
+                  {model.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Select the ML model for phishing detection
+            </p>
+          </div>
+
           {!apiUrl && (
             <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
               <div className="flex items-start gap-2">
@@ -105,7 +135,7 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
             <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
               <span className="text-sm text-green-800 dark:text-green-200">
-                URL saved successfully!
+                Settings saved successfully!
               </span>
             </div>
           )}
@@ -145,7 +175,7 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
           </Button>
           <Button onClick={handleSave} className="gap-2" disabled={!apiUrl.trim()}>
             <Save className="w-4 h-4" />
-            Save URL
+            Save
           </Button>
         </div>
       </DialogContent>

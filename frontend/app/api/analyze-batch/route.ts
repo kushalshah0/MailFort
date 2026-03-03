@@ -1,13 +1,7 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
-
-interface AnalyzeEmailResponse {
-  label: "phishing" | "legitimate";
-  confidence: number;
-  severity: "low" | "medium" | "high";
-  phishing_type: string | null;
-}
+import { Prediction, TokenScore } from "@/lib/gmail";
 
 function calculateSeverity(confidence: number): "low" | "medium" | "high" {
   if (confidence >= 0.9) return "high";
@@ -17,44 +11,68 @@ function calculateSeverity(confidence: number): "low" | "medium" | "high" {
 
 async function analyzeEmail(
   email: { message_id: string; subject: string; from: string; body: string },
-  apiUrl: string
-): Promise<AnalyzeEmailResponse> {
+  apiUrl: string,
+  model: string
+): Promise<Prediction> {
   try {
     const text = `${email.subject} ${email.body}`.trim();
+    const baseUrl = apiUrl.replace(/\/$/, "");
 
-    const response = await fetch(`${apiUrl}/predict`, {
+    const response = await fetch(`${baseUrl}/predict`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         text: text,
-        model: "phishing",
+        model: model,
       }),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`FastAPI returned ${response.status}:`, errorText);
       throw new Error(`FastAPI returned ${response.status}`);
     }
 
     const result = await response.json();
 
+    // console.log("API Response keys:", Object.keys(result));
+    // console.log("API Response:", JSON.stringify(result, null, 2));
+
     const label = result.prediction?.toLowerCase() === "phishing" ? "phishing" : "legitimate";
     const confidence = typeof result.confidence === "number" ? result.confidence : 0.5;
+    
+    let topTokens: TokenScore[] = [];
+    
+    // Check multiple possible field names for top tokens
+    const tokensData = result.top_tokens ?? result.topTokens ?? result.tokens ?? null;
+    // console.log("Tokens data:", tokensData);
+    
+    if (tokensData && Array.isArray(tokensData)) {
+      topTokens = tokensData.map((t: any) => ({
+        token: t.token ?? t.word ?? t.text ?? String(t),
+        shap_score: t.shap_score ?? t.shapScore ?? t.score ?? 0,
+      })).filter((t: TokenScore) => t.token && t.shap_score !== undefined);
+    }
+
+    // console.log("Parsed top tokens:", topTokens);
 
     return {
       label,
       confidence: Math.round(confidence * 10000) / 10000,
       severity: calculateSeverity(confidence),
       phishing_type: null,
+      top_tokens: topTokens,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error calling FastAPI:", error);
     return {
       label: "legitimate",
       confidence: 0.5,
       severity: "low",
       phishing_type: null,
+      top_tokens: [],
     };
   }
 }
@@ -72,6 +90,7 @@ export async function POST(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const apiUrl = searchParams.get("apiUrl");
+    const model = searchParams.get("model") || "bert";
 
     if (!apiUrl) {
       return NextResponse.json(
@@ -98,7 +117,8 @@ export async function POST(request: Request) {
             from: email.from,
             body: email.body,
           },
-          apiUrl
+          apiUrl,
+          model
         );
 
         return {
