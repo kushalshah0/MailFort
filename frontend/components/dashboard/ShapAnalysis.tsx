@@ -103,14 +103,6 @@ export function ShapAnalysis({ topTokens, label }: ShapAnalysisProps) {
         </div>
       )}
 
-      {/* Summary */}
-      <div className="pt-2 border-t text-xs text-gray-500 dark:text-gray-400">
-        <p>
-          {isPhishing 
-            ? "Red tokens indicate words that increased phishing probability."
-            : "Green tokens indicate words that increased legitimate probability."}
-        </p>
-      </div>
     </Card>
   );
 }
