@@ -53,7 +53,15 @@ async function analyzeEmail(
       topTokens = tokensData.map((t: any) => ({
         token: t.token ?? t.word ?? t.text ?? String(t),
         shap_score: t.shap_score ?? t.shapScore ?? t.score ?? 0,
-      })).filter((t: TokenScore) => t.token && t.shap_score !== undefined);
+      })).filter((t: TokenScore) => {
+        if (!t.token || t.shap_score === undefined) return false;
+        const token = t.token.toLowerCase();
+        // Filter out only <OOV> tokens
+        if (token === '<oov>' || token === 'oov') return false;
+        // Filter out single characters only
+        if (token.length <= 1) return false;
+        return true;
+      });
     }
 
     // console.log("Parsed top tokens:", topTokens);

@@ -1,14 +1,18 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Shield, Mail } from "lucide-react";
+import { Shield, AlertCircle } from "lucide-react";
 
 export default function SignIn() {
+  const searchParams = useSearchParams();
+  const expired = searchParams.get("expired");
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <Card className="w-full max-w-md p-8 space-y-6">
+      <Card className={`w-full max-w-md p-8 ${expired === "true" ? "space-y-4" : "space-y-6"}`}>
         <div className="flex flex-col items-center space-y-4">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
             <Shield className="w-10 h-10 text-white" />
@@ -19,22 +23,21 @@ export default function SignIn() {
           </p>
         </div>
 
-        <div className="space-y-4">
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-2">
-            <div className="flex items-start space-x-2">
-              <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-200">
-                  Secure Gmail Integration
-                </h3>
-                <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                  We only read your emails to analyze them for phishing threats.
-                  Your data never leaves our secure servers.
-                </p>
-              </div>
+        {expired === "true" && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-sm text-amber-900 dark:text-amber-200">
+                Session Expired
+              </h3>
+              <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                Your session has expired. Please sign in again.
+              </p>
             </div>
           </div>
+        )}
 
+        <div className="space-y-4">
           <Button
             onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
             className="w-full h-12 text-base"

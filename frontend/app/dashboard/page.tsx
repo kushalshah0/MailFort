@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { EmailWithPrediction } from "@/lib/gmail";
@@ -14,6 +14,10 @@ import { Button } from "@/components/ui/button";
 import { getApiUrl, getApiModel } from "@/lib/settings";
 
 type FilterType = "all" | "phishing" | "safe";
+
+async function handleSessionExpired() {
+  await signOut({ redirect: true, callbackUrl: "/auth/signin?expired=true" });
+}
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -68,6 +72,11 @@ export default function DashboardPage() {
       
       const response = await fetch("/api/emails/metadata?maxResults=30");
       
+      if (response.status === 401) {
+        await handleSessionExpired();
+        return;
+      }
+      
       if (!response.ok) {
         throw new Error("Failed to fetch emails");
       }
@@ -98,6 +107,11 @@ export default function DashboardPage() {
     try {
       setAnalyzingBatch(true);
       
+      console.log("=== ANALYZE BATCH REQUEST ===");
+      console.log("API URL:", currentApiUrl);
+      console.log("Model:", currentApiModel);
+      console.log("Emails to analyze:", emailsToAnalyze.length);
+      
       const response = await fetch(`/api/analyze-batch?apiUrl=${encodeURIComponent(currentApiUrl)}&model=${encodeURIComponent(currentApiModel)}`, {
         method: "POST",
         headers: {
@@ -106,11 +120,22 @@ export default function DashboardPage() {
         body: JSON.stringify({ emails: emailsToAnalyze }),
       });
       
+      console.log("Response status:", response.status);
+      
+      if (response.status === 401) {
+        await handleSessionExpired();
+        return;
+      }
+      
       if (!response.ok) {
         throw new Error("Failed to analyze emails");
       }
       
       const { results } = await response.json();
+      
+      console.log("=== ANALYZE BATCH RESPONSE ===");
+      console.log("Results:", JSON.stringify(results, null, 2));
+      console.log("=============================");
       
       // Update emails with predictions
       setEmails(prevEmails => {
@@ -164,8 +189,11 @@ export default function DashboardPage() {
     const currentApiUrl = getApiUrl();
     const currentApiModel = getApiModel();
     
+    console.log("=== ANALYZE EMAIL REQUEST ===");
     console.log("API URL:", currentApiUrl);
     console.log("API Model:", currentApiModel);
+    console.log("Email subject:", email.subject);
+    console.log("Email from:", email.from);
     
     if (!currentApiUrl) {
       console.log("No API URL configured");
@@ -181,8 +209,20 @@ export default function DashboardPage() {
       body: JSON.stringify({ emails: [email] }),
     });
     
+    console.log("Response status:", response.status);
+    
+    if (response.status === 401) {
+      await handleSessionExpired();
+      return;
+    }
+    
     if (response.ok) {
       const { results } = await response.json();
+      
+      console.log("=== ANALYZE EMAIL RESPONSE ===");
+      console.log("Result:", JSON.stringify(results, null, 2));
+      console.log("==============================");
+      
       const prediction = results[0]?.prediction;
       
       console.log("Prediction result:", prediction);

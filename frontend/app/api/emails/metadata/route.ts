@@ -21,8 +21,17 @@ export async function GET(request: Request) {
     const emails = await fetchEmails(session.accessToken, maxResults);
 
     return NextResponse.json({ emails });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in /api/emails/metadata:", error);
+    
+    // Check if it's an authentication error
+    if (error.message?.includes("Authentication failed") || error.message?.includes("401") || error.code === 401) {
+      return NextResponse.json(
+        { error: "Unauthorized. Please sign in again." },
+        { status: 401 }
+      );
+    }
+    
     return NextResponse.json(
       { error: "Failed to fetch email metadata" },
       { status: 500 }
