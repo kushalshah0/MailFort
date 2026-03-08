@@ -57,15 +57,14 @@ export function ShapAnalysis({ topTokens, label }: ShapAnalysisProps) {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: idx * 0.05 }}
-                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-red-950 dark:text-red-100"
                 style={{
                   backgroundColor: `rgba(239, 68, 68, ${Math.min(Math.abs(token.shap_score) / maxScore + 0.2, 1)})`,
-                  color: Math.abs(token.shap_score) / maxScore > 0.5 ? 'white' : '#991b1b',
                 }}
                 title={`SHAP: ${token.shap_score.toFixed(4)}`}
               >
                 {token.token}
-                <span className="ml-1 opacity-60 text-[10px]">
+                <span className="ml-1 opacity-60 text-[10px] dark:opacity-80">
                   {token.shap_score.toFixed(2)}
                 </span>
               </motion.span>
@@ -88,15 +87,14 @@ export function ShapAnalysis({ topTokens, label }: ShapAnalysisProps) {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: idx * 0.05 }}
-                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-green-950 dark:text-green-100"
                 style={{
                   backgroundColor: `rgba(34, 197, 94, ${Math.min(Math.abs(token.shap_score) / maxScore + 0.2, 1)})`,
-                  color: Math.abs(token.shap_score) / maxScore > 0.5 ? 'white' : '#166534',
                 }}
                 title={`SHAP: ${token.shap_score.toFixed(4)}`}
               >
                 {token.token}
-                <span className="ml-1 opacity-60 text-[10px]">
+                <span className="ml-1 opacity-60 text-[10px] dark:opacity-80">
                   {token.shap_score.toFixed(2)}
                 </span>
               </motion.span>
