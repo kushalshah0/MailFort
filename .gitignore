@@ -48,3 +48,7 @@ backend/models/
 
 # Temporary files
 tmp_*
+
+GETTING_STARTED.md
+PROJECT_SUMMARY.md
+QUICK_REFERENCE.md
