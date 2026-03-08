@@ -292,8 +292,19 @@ function formatEmailBody(body: string): string {
   const isHTML = body.includes("<html") || body.includes("<!DOCTYPE") || body.includes("<div") || body.includes("<p");
 
   if (isHTML) {
-    // Return HTML as-is with just wrapping for overflow
-    return `<div style="word-break: break-word; overflow-wrap: anywhere; max-width: 100%;">${body}</div>`;
+    // Clean up HTML and neutralize styles that cause gaps
+    let cleaned = body
+      // Remove excessive whitespace between tags
+      .replace(/>\s+</g, '><')
+      // Remove empty paragraphs
+      .replace(/<p>\s*<\/p>/g, '')
+      // Remove style tags that might cause issues
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      // Remove head tags
+      .replace(/<head[\s\S]*?<\/head>/gi, '');
+    
+    // Wrap with container that handles overflow and breaks
+    return `<div class="email-content" style="word-break: break-word; overflow-wrap: anywhere; max-width: 100%;">${cleaned}</div>`;
   }
 
   // For plain text emails, preserve formatting and make URLs clickable
@@ -305,10 +316,11 @@ function formatEmailBody(body: string): string {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline" style="word-break: break-all;">${url}</a>`;
   });
   
-  // Convert line breaks to <br> tags
+  // Convert line breaks to <br> tags, but collapse multiple breaks
+  formatted = formatted.replace(/\n{3,}/g, '<br><br>');
   formatted = formatted.replace(/\n/g, "<br />");
 
-  return `<div style="white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; max-width: 100%; font-family: inherit;">${formatted}</div>`;
+  return `<div style="white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; max-width: 100%; font-family: inherit; line-height: 1.6;">${formatted}</div>`;
 }
 
 function formatShortDate(dateString: string): string {
