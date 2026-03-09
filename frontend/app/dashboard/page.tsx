@@ -197,6 +197,35 @@ export default function DashboardPage() {
     
     if (!currentApiUrl) {
       console.log("No API URL configured");
+      // Set prediction with error so UI shows proper message
+      setEmails(prevEmails => {
+        const index = prevEmails.findIndex(e => e.id === email.id);
+        if (index !== -1) {
+          const updated = [...prevEmails];
+          updated[index] = {
+            ...updated[index],
+            prediction: {
+              label: "legitimate",
+              confidence: 0,
+              severity: "low",
+              phishing_type: null,
+              error: "API URL not configured. Please set it in Settings.",
+            }
+          };
+          return updated;
+        }
+        return prevEmails;
+      });
+      setSelectedEmail(prev => prev ? {
+        ...prev,
+        prediction: {
+          label: "legitimate",
+          confidence: 0,
+          severity: "low",
+          phishing_type: null,
+          error: "API URL not configured. Please set it in Settings.",
+        }
+      } : null);
       return;
     }
     
