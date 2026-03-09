@@ -23,6 +23,7 @@ export interface Prediction {
   severity: "low" | "medium" | "high";
   phishing_type: string | null;
   top_tokens?: TokenScore[];
+  error?: string;
 }
 
 export interface EmailWithPrediction extends Email {

@@ -30,6 +30,7 @@ export function EmailViewer({ email, onBack }: EmailViewerProps) {
   const confidence = email.prediction?.confidence || 0;
   const severity = email.prediction?.severity || "low";
   const hasAnalysis = !!email.prediction;
+  const error = email.prediction?.error;
 
   return (
     <div className="flex-1 bg-gray-50 dark:bg-gray-900 flex flex-col h-full">
@@ -62,7 +63,8 @@ export function EmailViewer({ email, onBack }: EmailViewerProps) {
             label={email.prediction?.label}
             confidence={confidence}
             severity={severity}
-            isAnalyzing={!hasAnalysis}
+            isAnalyzing={!hasAnalysis && !error}
+            error={error}
           />
 
           {/* SHAP Analysis - Only show if analyzed */}
@@ -122,9 +124,10 @@ interface PredictionCardProps {
   confidence: number;
   severity: string;
   isAnalyzing?: boolean;
+  error?: string;
 }
 
-function PredictionCard({ label, confidence, severity, isAnalyzing }: PredictionCardProps) {
+function PredictionCard({ label, confidence, severity, isAnalyzing, error }: PredictionCardProps) {
   const isPhishing = label === "phishing";
   const percentage = Math.round(confidence * 100);
 
@@ -139,6 +142,26 @@ function PredictionCard({ label, confidence, severity, isAnalyzing }: Prediction
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Running ML model to detect phishing
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800">
+        <div className="flex items-start space-x-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-7 h-7 text-white" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-amber-700 dark:text-amber-300">
+              Analysis Unavailable
+            </h3>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+              {error}
             </p>
           </div>
         </div>

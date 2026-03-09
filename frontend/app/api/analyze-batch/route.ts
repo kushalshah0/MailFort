@@ -75,12 +75,25 @@ async function analyzeEmail(
     };
   } catch (error: any) {
     console.error("Error calling FastAPI:", error);
+    let errorMessage = "Unable to analyze email.";
+    
+    if (error.message?.includes("fetch failed") || error.cause?.code === "ECONNREFUSED") {
+      errorMessage = "Backend is offline. Please check your API URL in Settings.";
+    } else if (error.message?.includes("NetworkError") || error.message?.includes("network")) {
+      errorMessage = "Network error. Please check your internet connection.";
+    } else if (error.message?.includes("timeout")) {
+      errorMessage = "Request timed out. Please try again.";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
     return {
       label: "legitimate",
-      confidence: 0.5,
+      confidence: 0,
       severity: "low",
       phishing_type: null,
       top_tokens: [],
+      error: errorMessage,
     };
   }
 }
