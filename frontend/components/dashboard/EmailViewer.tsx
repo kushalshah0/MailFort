@@ -81,10 +81,7 @@ export function EmailViewer({ email, onBack }: EmailViewerProps) {
               </h1>
 
               {/* Sender Info */}
-              <div className="flex items-start gap-2 sm:gap-3 pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold flex-shrink-0 text-xs sm:text-sm">
-                  {email.from.charAt(0).toUpperCase()}
-                </div>
+              <div className="flex items-start pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2 overflow-hidden">
                     <div className="flex-1 min-w-0 overflow-hidden">

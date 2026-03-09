@@ -165,14 +165,7 @@ function EmailListItem({ email, isSelected, onSelect }: EmailListItemProps) {
           : "border-l-4 border-l-transparent"
       }`}
     >
-      <div className="flex items-center gap-3 min-w-0">
-        {/* Avatar */}
-        <div className="flex-shrink-0">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-xs">
-            {senderName.charAt(0).toUpperCase()}
-          </div>
-        </div>
-
+      <div className="flex items-center min-w-0">
         {/* Email Content */}
         <div className="flex-1 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between gap-2 mb-0.5 min-w-0">
