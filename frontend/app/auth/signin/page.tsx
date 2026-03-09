@@ -2,11 +2,12 @@
 
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Shield, AlertCircle } from "lucide-react";
 
-export default function SignIn() {
+function SignInContent() {
   const searchParams = useSearchParams();
   const expired = searchParams.get("expired");
 
@@ -70,5 +71,36 @@ export default function SignIn() {
         </div>
       </Card>
     </div>
+  );
+}
+
+function SignInLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <Card className="w-full max-w-md p-8 space-y-6">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+            <Shield className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-center">MailFort</h1>
+          <p className="text-center text-gray-600 dark:text-gray-400">
+            AI-Powered Email Phishing Detection
+          </p>
+        </div>
+        <div className="space-y-4">
+          <Button className="w-full h-12 text-base" size="lg" disabled>
+            Loading...
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+export default function SignIn() {
+  return (
+    <Suspense fallback={<SignInLoading />}>
+      <SignInContent />
+    </Suspense>
   );
 }
