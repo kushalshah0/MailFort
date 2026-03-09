@@ -169,77 +169,146 @@
   word-break: break-word;
 }
 
-/* Email content styling - preserve original structure */
-.email-content {
-  color: inherit;
-  line-height: 1.6;
+/* Email content styling - Modern Gmail/Outlook style */
+.email-content,
+.email-html,
+.email-plain {
+  color: #222;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-.email-content * {
-  max-width: 100%;
+.email-paragraph {
+  margin: 0 0 10px 0;
+  line-height: 1.5;
 }
 
-.email-content img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+.email-plain {
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
-.email-content table {
-  width: 100%;
-  border-collapse: collapse;
-  overflow-x: auto;
-  display: block;
+.email-quote {
+  border-left: 3px solid #ccc;
+  padding-left: 12px;
+  margin: 8px 0;
+  color: #666;
+  background: #f9f9f9;
 }
 
-.email-content a {
-  color: #2563eb;
+.email-link {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.email-link:hover {
   text-decoration: underline;
 }
 
-.email-content a:hover {
-  color: #1e40af;
+/* HTML Email Styles */
+.email-html * {
+  max-width: 100%;
 }
 
-.email-content p {
-  margin-bottom: 1em;
+.email-html img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 8px 0;
 }
 
-.email-content h1, .email-content h2, .email-content h3 {
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
+.email-html table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+}
+
+.email-html table td {
+  border: 1px solid #e5e5e5;
+  padding: 8px;
+}
+
+.email-html a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.email-html a:hover {
+  text-decoration: underline;
+}
+
+.email-html p {
+  margin: 0 0 10px 0;
+}
+
+.email-html h1,
+.email-html h2,
+.email-html h3 {
+  margin: 16px 0 8px 0;
   font-weight: 600;
 }
 
-.email-content ul, .email-content ol {
-  margin-left: 1.5em;
-  margin-bottom: 1em;
+.email-html ul,
+.email-html ol {
+  margin: 8px 0 10px 20px;
+  padding-left: 20px;
 }
 
-.email-content blockquote {
-  border-left: 3px solid #d1d5db;
-  padding-left: 1em;
-  margin-left: 0;
-  color: #6b7280;
+.email-html blockquote {
+  border-left: 4px solid #e5e5e5;
+  padding-left: 16px;
+  margin: 12px 0;
+  color: #666;
 }
 
-.email-content pre, .email-content code {
-  background-color: #f3f4f6;
-  padding: 0.2em 0.4em;
-  border-radius: 0.25rem;
-  font-size: 0.9em;
+.email-html pre,
+.email-html code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.email-html pre {
+  padding: 12px;
   overflow-x: auto;
+  margin: 12px 0;
 }
 
-.email-content pre {
-  padding: 1em;
-  margin-bottom: 1em;
+/* Dark mode */
+.dark .email-content,
+.dark .email-html,
+.dark .email-plain {
+  color: #e5e5e5;
 }
 
-/* Dark mode adjustments */
-.dark .email-content blockquote {
-  border-left-color: #4b5563;
-  color: #9ca3af;
+.dark .email-quote {
+  border-left-color: #555;
+  color: #aaa;
+  background: #2a2a2a;
+}
+
+.dark .email-link {
+  color: #8ab4f8;
+}
+
+.dark .email-html table td {
+  border-color: #444;
+}
+
+.dark .email-html a {
+  color: #8ab4f8;
+}
+
+.dark .email-html blockquote {
+  border-left-color: #555;
+  color: #aaa;
+}
+
+.dark .email-html pre,
+.dark .email-html code {
+  background: #2a2a2a;
 }
 
 .dark .email-content pre,
