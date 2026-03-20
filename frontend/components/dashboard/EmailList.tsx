@@ -184,9 +184,7 @@ function EmailListItem({ email, isSelected, onSelect }: EmailListItemProps) {
             <RiskBadge label={email.prediction?.label} severity={severity} compact />
           </div>
 
-          <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-            {email.snippet}
-          </p>
+
         </div>
       </div>
     </div>
@@ -208,11 +206,7 @@ function RiskBadge({ label, severity, compact }: { label?: string; severity: str
     );
   }
 
-  return (
-    <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0 h-5 text-xs">
-      <ShieldCheck className="w-3 h-3" />
-    </Badge>
-  );
+  return null;
 }
 
 function ConfidenceMeter({ confidence }: { confidence: number }) {
