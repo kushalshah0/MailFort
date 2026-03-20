@@ -4,12 +4,12 @@ A production-ready BERT-based email phishing detection system with Gmail integra
 
 ## Features
 
-- 🛡️ **BERT-Powered Detection** - Advanced machine learning for accurate phishing detection
-- 🔐 **Secure OAuth** - Google OAuth 2.0 with server-side token management
-- 📧 **Gmail Integration** - Seamless inbox access with read-only permissions
-- 🎨 **Modern UI** - Three-pane email client with risk indicators
-- ⚡ **Real-Time Analysis** - Instant predictions with confidence scores
-- 🎯 **Severity Levels** - High, medium, and low risk classifications
+- **BERT-Powered Detection** - Advanced machine learning for accurate phishing detection
+- **Secure OAuth** - Google OAuth 2.0 with server-side token management
+- **Gmail Integration** - Seamless inbox access with read-only permissions
+- **Modern UI** - Three-pane email client with risk indicators
+- **Real-Time Analysis** - Instant predictions with confidence scores
+- **Severity Levels** - High, medium, and low risk classifications
 
 ## Tech Stack
 

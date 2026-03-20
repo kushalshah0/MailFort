@@ -2,37 +2,37 @@
 
 A production-ready, BERT-based AI email phishing detection system with a modern three-pane Gmail-integrated interface.
 
-## 🎯 Project Overview
+## Project Overview
 
 **MailFort** is a full-stack web application that helps users identify phishing emails using state-of-the-art BERT machine learning technology. It integrates seamlessly with Gmail to analyze emails in real-time and display comprehensive risk assessments.
 
-## ✨ Key Features
+## Key Features
 
-- 🤖 **BERT AI Model** - Advanced transformer-based neural network for phishing detection
-- 🔐 **Secure Google OAuth** - Server-side authentication with Gmail API integration
-- 📊 **Risk Assessment** - Confidence scores, severity levels (high/medium/low), and detailed predictions
-- 🎨 **Modern UI** - Beautiful three-pane email client interface with Tailwind CSS and shadcn/ui
-- ⚡ **Real-Time Analysis** - Instant email scanning before display
-- 🛡️ **Security-First** - OAuth tokens never exposed to client, read-only Gmail access
+- **BERT AI Model** - Advanced transformer-based neural network for phishing detection
+- **Secure Google OAuth** - Server-side authentication with Gmail API integration
+- **Risk Assessment** - Confidence scores, severity levels (high/medium/low), and detailed predictions
+- **Modern UI** - Beautiful three-pane email client interface with Tailwind CSS and shadcn/ui
+- **Real-Time Analysis** - Instant email scanning before display
+- **Security-First** - OAuth tokens never exposed to client, read-only Gmail access
 
-## 🏗️ Architecture
+## Architecture
 
 ```
-┌─────────────┐     Google OAuth      ┌──────────────────┐
-│    User     │ ◄──────────────────► │   Next.js BFF    │
-└─────────────┘                       │  (Server-side)   │
-                                      └──────────────────┘
-                                              │
-                    ┌─────────────────────────┼─────────────────────────┐
-                    │                         │                         │
-                    ▼                         ▼                         ▼
-            ┌──────────────┐        ┌──────────────┐         ┌──────────────┐
-            │  Gmail API   │        │   FastAPI    │         │  Dashboard   │
-            │  (Read-Only) │        │ BERT Engine  │         │     UI       │
-            └──────────────┘        └──────────────┘         └──────────────┘
++-------------+     Google OAuth      +------------------+
+|    User     | <------------------> |   Next.js BFF    |
++-------------+                      |  (Server-side)   |
+                                      +------------------+
+                                              |
+                    +-------------------------+-------------------------+
+                    |                         |                         |
+                    v                         v                         v
+            +--------------+          +--------------+          +--------------+
+            |  Gmail API   |          |   FastAPI    |          |  Dashboard   |
+            |  (Read-Only) |          | BERT Engine  |          |     UI       |
+            +--------------+          +--------------+          +--------------+
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 MailFort/
@@ -42,21 +42,21 @@ MailFort/
 │   │   │   ├── auth/          # NextAuth OAuth
 │   │   │   ├── emails/        # Gmail integration
 │   │   │   └── analyze/       # BERT analysis endpoint
-│   │   ├── dashboard/         # Main dashboard
+│   │   ├── dashboard/          # Main dashboard
 │   │   └── auth/signin/       # Sign-in page
 │   ├── components/
-│   │   ├── dashboard/         # Dashboard components
+│   │   ├── dashboard/          # Dashboard components
 │   │   └── ui/                # shadcn/ui components
-│   └── lib/                   # Utilities
+│   └── lib/                    # Utilities
 │
-├── backend/          # FastAPI Backend
-│   ├── main.py               # BERT inference server
-│   └── requirements.txt      # Python dependencies
+├── backend/           # FastAPI Backend
+│   ├── main.py                # BERT inference server
+│   └── requirements.txt       # Python dependencies
 │
-└── README.md                 # This file
+└── README.md                  # This file
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -132,7 +132,7 @@ Frontend runs at: `http://localhost:3000`
 4. Grant Gmail read permissions
 5. View your analyzed emails in the dashboard!
 
-## 🎨 User Interface
+## User Interface
 
 ### Landing Page
 - Hero section with feature highlights
@@ -156,7 +156,7 @@ Frontend runs at: `http://localhost:3000`
    - Full email content
    - Sender/recipient details
 
-## 🔧 Technology Stack
+## Technology Stack
 
 ### Frontend
 | Technology | Purpose |
@@ -178,7 +178,7 @@ Frontend runs at: `http://localhost:3000`
 | **BeautifulSoup4** | HTML parsing |
 | **Uvicorn** | ASGI server |
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Frontend API Routes (Next.js)
 
@@ -234,7 +234,7 @@ Analyze single email for phishing
 {
   "message_id": "string",
   "subject": "string",
-  "from_": "string",
+  "from": "string",
   "body": "string"
 }
 ```
@@ -261,16 +261,16 @@ Health check endpoint
 }
 ```
 
-## 🔒 Security Features
+## Security Features
 
-- ✅ **Server-side OAuth** - Access tokens never exposed to client
-- ✅ **Read-only Gmail access** - No modification permissions
-- ✅ **Environment variables** - Sensitive data protected
-- ✅ **NextAuth session management** - Secure JWT tokens
-- ✅ **CORS protection** - Restricted API access
-- ✅ **Middleware authentication** - Protected routes
+- **Server-side OAuth** - Access tokens never exposed to client
+- **Read-only Gmail access** - No modification permissions
+- **Environment variables** - Sensitive data protected
+- **NextAuth session management** - Secure JWT tokens
+- **CORS protection** - Restricted API access
+- **Middleware authentication** - Protected routes
 
-## 🧠 BERT Model Pipeline
+## BERT Model Pipeline
 
 1. **Preprocessing**:
    - Strip HTML tags
@@ -290,11 +290,11 @@ Health check endpoint
    - Label determination (phishing/legitimate)
    - Confidence score (0.0 - 1.0)
    - Severity classification:
-     - **High**: confidence ≥ 0.90
-     - **Medium**: confidence ≥ 0.70
+     - **High**: confidence >= 0.90
+     - **Medium**: confidence >= 0.70
      - **Low**: confidence < 0.70
 
-## 🎯 Development Roadmap
+## Development Roadmap
 
 - [x] Phase 1: Project setup
 - [x] Phase 2: Google OAuth authentication
@@ -303,18 +303,18 @@ Health check endpoint
 - [x] Phase 5: Three-pane UI implementation
 - [x] Phase 6: Polishing and optimization
 
-## 📝 License
+## License
 
 MIT License - See LICENSE file for details
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
 
-## 📧 Support
+## Support
 
 For questions or issues, please open a GitHub issue.
 
 ---
 
-**Built with ❤️ using Next.js, FastAPI, and BERT**
+**Built with Next.js, FastAPI, and BERT**
