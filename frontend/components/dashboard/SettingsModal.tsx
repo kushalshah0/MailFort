@@ -115,22 +115,6 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
             </p>
           </div>
 
-          {!apiUrl && (
-            <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                    No Backend Configured
-                  </p>
-                  <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                    Enter your Cloudflare tunnel URL to enable phishing analysis
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {saved && (
             <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-green-600" />
@@ -149,18 +133,21 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
               <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium flex-shrink-0">1</span>
-                  <span>Run your FastAPI in Google Colab</span>
+                  <a 
+                    href="https://colab.research.google.com/github/kushalshah0/Detecting-AI-Generated-Phishing-Emails-Using-BERT/blob/main/ai_generated_phishing_email_detection_FastAPI.ipynb" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Open the Colab notebook and run all cells
+                  </a>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium flex-shrink-0">2</span>
-                  <span>Start cloudflared tunnel in a cell</span>
+                  <span>Copy the generated tunnel HTTPS URL</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium flex-shrink-0">3</span>
-                  <span>Copy the generated HTTPS URL</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium flex-shrink-0">4</span>
                   <span>Paste it in the field above</span>
                 </li>
               </ol>
