@@ -31,7 +31,7 @@ export default function DashboardPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showEmailViewer, setShowEmailViewer] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [displayCount, setDisplayCount] = useState(5);
+  const [displayCount, setDisplayCount] = useState(7);
   const [analyzedIds, setAnalyzedIds] = useState<Set<string>>(new Set());
   const [analyzingBatch, setAnalyzingBatch] = useState(false);
   const [apiUrl, setApiUrl] = useState<string | null>(null);
@@ -62,7 +62,7 @@ export default function DashboardPage() {
     try {
       if (refresh) {
         setLoading(true);
-        setDisplayCount(5);
+        setDisplayCount(7);
         setSelectedEmail(null);
         setAnalyzedIds(new Set());
       } else {

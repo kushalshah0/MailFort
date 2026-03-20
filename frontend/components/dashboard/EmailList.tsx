@@ -114,10 +114,10 @@ export function EmailList({
 
         {/* Load More Button */}
         {hasMore && (
-          <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex justify-center">
             <Button
               variant="outline"
-              className="w-full h-9 sm:h-10 text-sm"
+              className="w-32 h-9 sm:h-10 text-sm border"
               onClick={onLoadMore}
               disabled={loadingMore}
             >
