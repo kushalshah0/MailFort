@@ -10,7 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getApiUrl, setApiUrl, clearApiSettings, getApiModel, setApiModel, ModelType } from "@/lib/settings";
+import { getApiUrl, setApiUrl, clearApiSettings, getApiModel, setApiModel, getAnalysisMode, setAnalysisMode, AnalysisMode, ModelType } from "@/lib/settings";
+import { Layers } from "lucide-react";
 
 interface SettingsModalProps {
   open: boolean;
@@ -24,16 +25,24 @@ const MODELS: { value: ModelType; label: string }[] = [
   { value: "gru", label: "GRU" },
 ];
 
+const ANALYSIS_MODES: { value: AnalysisMode; label: string; description: string }[] = [
+  { value: "single", label: "Single", description: "Analyze when email is selected" },
+  { value: "batch", label: "Batch", description: "Analyze all displayed emails" },
+];
+
 export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModalProps) {
   const [apiUrl, setApiUrlState] = useState("");
   const [apiModel, setApiModelState] = useState<ModelType>("bert");
+  const [analysisMode, setAnalysisModeState] = useState<AnalysisMode>("single");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const url = getApiUrl();
     const model = getApiModel();
+    const mode = getAnalysisMode();
     if (url) setApiUrlState(url);
     setApiModelState(model);
+    setAnalysisModeState(mode);
   }, [open]);
 
   const handleSave = () => {
@@ -41,6 +50,7 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
     if (trimmedUrl) {
       setApiUrl(trimmedUrl);
       setApiModel(apiModel);
+      setAnalysisMode(analysisMode);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       if (onUrlChange) onUrlChange();
@@ -51,6 +61,7 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
   const handleClear = () => {
     setApiUrlState("");
     setApiModelState("bert");
+    setAnalysisModeState("single");
     clearApiSettings();
     if (onUrlChange) onUrlChange();
   };
@@ -119,6 +130,50 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Select the ML model for phishing detection
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              Analysis Mode
+            </label>
+            <div className="flex gap-4">
+              {ANALYSIS_MODES.map((mode) => (
+                <label
+                  key={mode.value}
+                  className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${
+                    analysisMode === mode.value
+                      ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="analysisMode"
+                    value={mode.value}
+                    checked={analysisMode === mode.value}
+                    onChange={() => setAnalysisModeState(mode.value)}
+                    className="sr-only"
+                  />
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    analysisMode === mode.value
+                      ? "border-blue-600"
+                      : "border-gray-400 dark:border-gray-500"
+                  }`}>
+                    {analysisMode === mode.value && (
+                      <div className="w-2 h-2 rounded-full bg-blue-600" />
+                    )}
+                  </div>
+                  <span className={`text-sm font-medium ${
+                    analysisMode === mode.value
+                      ? "text-blue-700 dark:text-blue-300"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}>
+                    {mode.label}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {saved && (

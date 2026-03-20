@@ -11,7 +11,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getApiUrl, getApiModel } from "@/lib/settings";
+import { getApiUrl, getApiModel, getAnalysisMode } from "@/lib/settings";
 
 type FilterType = "all" | "phishing" | "safe";
 
@@ -90,6 +90,14 @@ export default function DashboardPage() {
       
       setLoading(false);
       
+      // Check analysis mode and analyze if batch mode
+      if (getAnalysisMode() === "batch") {
+        // Wait for next render to get displayed emails, then analyze
+        setTimeout(() => {
+          const emailsToAnalyze = data.emails.slice(0, displayCount);
+          analyzeEmailBatch(emailsToAnalyze);
+        }, 100);
+      }
     } catch (err) {
       console.error("Error fetching emails:", err);
       setError("Failed to load emails. Please try again.");
@@ -169,6 +177,19 @@ export default function DashboardPage() {
   const handleLoadMore = () => {
     const newDisplayCount = displayCount + 5;
     setDisplayCount(newDisplayCount);
+    
+    // In batch mode, analyze the new emails
+    if (getAnalysisMode() === "batch") {
+      const currentApiUrl = getApiUrl();
+      if (currentApiUrl) {
+        const emailsToAnalyze = emails.slice(displayCount, newDisplayCount);
+        if (emailsToAnalyze.length > 0) {
+          setTimeout(() => {
+            analyzeEmailBatch(emailsToAnalyze);
+          }, 100);
+        }
+      }
+    }
   };
 
   const filteredEmails = emails.filter((email) => {
@@ -184,6 +205,13 @@ export default function DashboardPage() {
   const handleEmailSelect = async (email: EmailWithPrediction) => {
     setSelectedEmail(email);
     setShowEmailViewer(true);
+    
+    // Check if email needs analysis (no prediction or has error)
+    const needsAnalysis = !email.prediction || !!email.prediction?.error;
+    
+    if (!needsAnalysis) {
+      return; // Already analyzed, just show it
+    }
     
     // Analyze the email to get SHAP values
     const currentApiUrl = getApiUrl();
@@ -210,13 +238,13 @@ export default function DashboardPage() {
       return;
     }
     
-    // Always analyze when clicking (for SHAP values)
-    const response = await fetch(`/api/analyze-batch?apiUrl=${encodeURIComponent(currentApiUrl)}&model=${encodeURIComponent(currentApiModel)}`, {
+    // Analyze via /analyze endpoint
+    const response = await fetch(`/api/analyze?apiUrl=${encodeURIComponent(currentApiUrl)}&model=${encodeURIComponent(currentApiModel)}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ emails: [email] }),
+      body: JSON.stringify({ email }),
     });
     
     console.log("Response status:", response.status);
@@ -227,13 +255,11 @@ export default function DashboardPage() {
     }
     
     if (response.ok) {
-      const { results } = await response.json();
+      const { prediction } = await response.json();
       
       console.log("=== ANALYZE EMAIL RESPONSE ===");
-      console.log("Result:", JSON.stringify(results, null, 2));
+      console.log("Result:", JSON.stringify(prediction, null, 2));
       console.log("==============================");
-      
-      const prediction = results[0]?.prediction;
       
       console.log("Prediction result:", prediction);
       

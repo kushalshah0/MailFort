@@ -30,6 +30,8 @@ async function analyzeEmail(
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`FastAPI returned ${response.status}:`, errorText);
       throw new Error(`FastAPI returned ${response.status}`);
     }
 
@@ -53,15 +55,83 @@ async function analyzeEmail(
       phishing_type: null,
       top_tokens: topTokens,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error calling FastAPI:", error);
+    let errorMessage = "Unable to analyze email.";
+    
+    if (error.message?.includes("fetch failed") || error.cause?.code === "ECONNREFUSED") {
+      errorMessage = "Backend is offline. Please check your API URL in Settings.";
+    } else if (error.message?.includes("NetworkError") || error.message?.includes("network")) {
+      errorMessage = "Network error. Please check your internet connection.";
+    } else if (error.message?.includes("timeout")) {
+      errorMessage = "Request timed out. Please try again.";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
     return {
       label: "legitimate",
-      confidence: 0.5,
+      confidence: 0,
       severity: "low",
       phishing_type: null,
       top_tokens: [],
+      error: errorMessage,
     };
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.accessToken) {
+      return NextResponse.json(
+        { error: "Unauthorized. Please sign in again." },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const apiUrl = searchParams.get("apiUrl");
+    const model = searchParams.get("model") || "bert";
+
+    if (!apiUrl) {
+      return NextResponse.json(
+        { error: "API URL not configured. Please set it in Settings." },
+        { status: 400 }
+      );
+    }
+
+    const { email } = await request.json();
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Invalid request. Email required." },
+        { status: 400 }
+      );
+    }
+
+    const prediction = await analyzeEmail(
+      {
+        message_id: email.id,
+        subject: email.subject,
+        from: email.from,
+        body: email.body,
+      },
+      apiUrl,
+      model
+    );
+
+    return NextResponse.json({
+      id: email.id,
+      prediction,
+    });
+  } catch (error) {
+    console.error("Error in /api/analyze POST:", error);
+    return NextResponse.json(
+      { error: "Failed to analyze email" },
+      { status: 500 }
+    );
   }
 }
 

@@ -29,7 +29,7 @@ export function EmailViewer({ email, onBack }: EmailViewerProps) {
   const isPhishing = email.prediction?.label === "phishing";
   const confidence = email.prediction?.confidence || 0;
   const severity = email.prediction?.severity || "low";
-  const hasAnalysis = !!email.prediction;
+  const hasAnalysis = !!email.prediction && !email.prediction?.error;
   const error = email.prediction?.error;
 
   return (
@@ -56,7 +56,7 @@ export function EmailViewer({ email, onBack }: EmailViewerProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="w-full max-w-4xl mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6"
+          className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-4"
         >
           {/* BERT Verdict Card */}
           <PredictionCard
@@ -75,44 +75,40 @@ export function EmailViewer({ email, onBack }: EmailViewerProps) {
             />
           )}
 
-          {/* Email Header */}
-          <Card className="p-3 sm:p-4 md:p-6 overflow-hidden">
-            <div className="space-y-3 sm:space-y-4">
+          {/* Email Content */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg">
+            <div className="p-4 sm:p-6 space-y-4">
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white break-words" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                 {email.subject || "(No subject)"}
               </h1>
 
               {/* Sender Info */}
-              <div className="flex items-start pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2 overflow-hidden">
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white break-all" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
-                        {email.from}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 break-all" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}>
-                        to {email.to}
-                      </p>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
-                      {formatShortDate(email.date)}
-                    </p>
-                  </div>
+              <div className="flex items-start justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {email.from}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    to {email.to}
+                  </p>
                 </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                  {formatShortDate(email.date)}
+                </p>
               </div>
             </div>
-          </Card>
 
-          {/* Email Body */}
-          <Card className="p-3 sm:p-4 md:p-6 overflow-hidden">
-            <div
-              className="email-content max-w-none text-sm sm:text-base"
-              style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
-              dangerouslySetInnerHTML={{
-                __html: formatEmailBody(email.body),
-              }}
-            />
-          </Card>
+            {/* Email Body */}
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+              <div
+                className="email-content text-sm sm:text-base text-gray-800 dark:text-gray-200"
+                style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                dangerouslySetInnerHTML={{
+                  __html: formatEmailBody(email.body),
+                }}
+              />
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>
