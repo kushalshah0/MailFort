@@ -44,6 +44,7 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       if (onUrlChange) onUrlChange();
+      onOpenChange(false);
     }
   };
 
