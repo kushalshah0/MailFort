@@ -17,6 +17,7 @@ interface EmailListProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   loadingMore?: boolean;
+  filterLabel?: string;
 }
 
 export function EmailList({
@@ -28,6 +29,7 @@ export function EmailList({
   hasMore = false,
   onLoadMore,
   loadingMore = false,
+  filterLabel = "Inbox",
 }: EmailListProps) {
   if (loading) {
     return (
@@ -72,13 +74,16 @@ export function EmailList({
   if (emails.length === 0) {
     return (
       <div className="w-96 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
+        {/* List Header */}
+        <div className="border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex-shrink-0">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {filterLabel}
+          </h2>
+        </div>
         <div className="flex items-center justify-center h-full">
-          <div className="text-center space-y-3">
-            <ShieldCheck className="w-12 h-12 text-green-500 mx-auto" />
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              No emails to display
-            </p>
-          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No emails
+          </p>
         </div>
       </div>
     );
@@ -89,7 +94,7 @@ export function EmailList({
       {/* List Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex-shrink-0">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Inbox
+          {filterLabel}
         </h2>
       </div>
 

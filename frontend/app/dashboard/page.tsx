@@ -174,7 +174,7 @@ export default function DashboardPage() {
   const filteredEmails = emails.filter((email) => {
     if (filter === "all") return true;
     if (filter === "phishing") return email.prediction?.label === "phishing";
-    if (filter === "safe") return email.prediction?.label === "legitimate";
+    if (filter === "safe") return email.prediction?.label === "legitimate" && (email.prediction?.confidence ?? 0) > 0;
     return true;
   });
 
@@ -197,25 +197,6 @@ export default function DashboardPage() {
     
     if (!currentApiUrl) {
       console.log("No API URL configured");
-      // Set prediction with error so UI shows proper message
-      setEmails(prevEmails => {
-        const index = prevEmails.findIndex(e => e.id === email.id);
-        if (index !== -1) {
-          const updated = [...prevEmails];
-          updated[index] = {
-            ...updated[index],
-            prediction: {
-              label: "legitimate",
-              confidence: 0,
-              severity: "low",
-              phishing_type: null,
-              error: "API URL not configured. Please set it in Settings.",
-            }
-          };
-          return updated;
-        }
-        return prevEmails;
-      });
       setSelectedEmail(prev => prev ? {
         ...prev,
         prediction: {
@@ -294,7 +275,7 @@ export default function DashboardPage() {
   const emailCounts = {
     all: emails.length,
     phishing: emails.filter((e) => e.prediction?.label === "phishing").length,
-    safe: emails.filter((e) => e.prediction?.label === "legitimate").length,
+    safe: emails.filter((e) => e.prediction?.label === "legitimate" && e.prediction?.confidence > 0).length,
   };
 
   return (
@@ -336,6 +317,7 @@ export default function DashboardPage() {
         <div className={`${showEmailViewer ? 'hidden' : 'flex'} ${selectedEmail ? 'md:max-w-md lg:max-w-lg' : 'flex-1'} md:flex overflow-hidden`}>
           <EmailList
             emails={displayedEmails}
+            filterLabel={filter === "all" ? "Inbox" : filter === "phishing" ? "Phishing" : "Safe"}
             selectedEmail={selectedEmail}
             onSelectEmail={handleEmailSelect}
             loading={loading}
