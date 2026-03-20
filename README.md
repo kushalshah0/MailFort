@@ -36,24 +36,37 @@ A production-ready, BERT-based AI email phishing detection system with a modern 
 
 ```
 MailFort/
-├── frontend/          # Next.js Frontend
+├── frontend/                    # Next.js Frontend
 │   ├── app/
-│   │   ├── api/               # API routes
-│   │   │   ├── auth/          # NextAuth OAuth
-│   │   │   ├── emails/        # Gmail integration
-│   │   │   └── analyze/       # BERT analysis endpoint
-│   │   ├── dashboard/          # Main dashboard
-│   │   └── auth/signin/       # Sign-in page
+│   │   ├── api/
+│   │   │   ├── analyze/        # Single email analysis endpoint
+│   │   │   ├── analyze-batch/  # Batch email analysis endpoint
+│   │   │   ├── auth/[...nextauth]/  # NextAuth OAuth handlers
+│   │   │   ├── emails/         # Gmail integration endpoints
+│   │   │   └── emails/metadata/ # Email metadata endpoints
+│   │   ├── auth/signin/        # Sign-in page
+│   │   └── dashboard/          # Main dashboard page
 │   ├── components/
-│   │   ├── dashboard/          # Dashboard components
-│   │   └── ui/                # shadcn/ui components
-│   └── lib/                    # Utilities
+│   │   ├── dashboard/          # Dashboard UI components
+│   │   └── ui/                 # shadcn/ui components
+│   ├── lib/                     # Utilities and helpers
+│   ├── types/                   # TypeScript type definitions
+│   ├── public/                  # Static assets
+│   ├── components.json          # shadcn/ui configuration
+│   ├── next.config.ts           # Next.js configuration
+│   ├── tsconfig.json            # TypeScript configuration
+│   └── package.json
 │
-├── backend/           # FastAPI Backend
-│   ├── main.py                # BERT inference server
-│   └── requirements.txt       # Python dependencies
+├── backend/                     # FastAPI Backend
+│   ├── app/
+│   │   ├── core/                # Core functionality (models, config)
+│   │   └── services/            # Business logic services
+│   ├── models_data/             # ML model storage
+│   ├── main.py                  # FastAPI application entry
+│   ├── requirements.txt         # Python dependencies
+│   └── README.md
 │
-└── README.md                  # This file
+└── README.md                    # This file
 ```
 
 ## Quick Start
@@ -245,8 +258,38 @@ Analyze single email for phishing
   "label": "phishing",
   "confidence": 0.95,
   "severity": "high",
-  "phishing_type": null
+  "phishing_type": null,
+  "shap_tokens": [
+    {"token": "click", "shap_score": 0.15},
+    {"token": "compromised", "shap_score": 0.12},
+    {"token": "immediately", "shap_score": 0.08}
+  ]
 }
+```
+
+#### `POST /predict`
+Analyze text with specified model (BERT, LSTM, GRU) with SHAP explainability
+
+**Request:**
+```json
+{
+  "text": "string",
+  "model": "lstm | gru | bert"
+}
+```
+
+**Response:**
+```json
+{
+  "model": "lstm",
+  "prediction": "phishing | legitimate",
+  "confidence": 0.95,
+  "top_tokens": [
+    {"token": "click", "shap_score": 0.15},
+    {"token": "compromised", "shap_score": 0.12}
+  ]
+}
+```
 ```
 
 #### `GET /health`
