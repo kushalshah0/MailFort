@@ -99,17 +99,22 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
               <Cpu className="w-4 h-4" />
               ML Model
             </label>
-            <select
-              value={apiModel}
-              onChange={(e) => setApiModelState(e.target.value as ModelType)}
-              className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
+            <div className="grid grid-cols-3 gap-2">
               {MODELS.map((model) => (
-                <option key={model.value} value={model.value}>
+                <button
+                  key={model.value}
+                  type="button"
+                  onClick={() => setApiModelState(model.value)}
+                  className={`h-11 px-4 py-2 text-sm font-medium rounded-lg border transition-all ${
+                    apiModel === model.value
+                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                      : "bg-background text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+                >
                   {model.label}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Select the ML model for phishing detection
             </p>
