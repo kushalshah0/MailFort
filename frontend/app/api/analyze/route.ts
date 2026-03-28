@@ -15,18 +15,21 @@ async function analyzeEmail(
   model: string
 ): Promise<Prediction> {
   try {
-    const text = `${email.subject} ${email.body}`.trim();
+    const cleanedBody = email.body.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\*([^*]+)\*/g, '$1').replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+    const text = `${email.subject} ${cleanedBody}`;
     const baseUrl = apiUrl.replace(/\/$/, "");
+
+    const payload = {
+      text: text,
+      model: model,
+    };
 
     const response = await fetch(`${baseUrl}/predict`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        text: text,
-        model: model,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
