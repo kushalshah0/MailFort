@@ -192,22 +192,31 @@ export function SettingsModal({ open, onOpenChange, onUrlChange }: SettingsModal
                 Setup Instructions
               </h4>
               <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-2">
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium flex-shrink-0">1</span>
+                  <span>Choose notebook and run all cells: </span>
                   <a 
                     href="https://colab.research.google.com/github/kushalshah0/Detecting-AI-Generated-Phishing-Emails-Using-BERT/blob/main/ai_generated_phishing_email_detection_FastAPI.ipynb" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
-                    Open the Colab notebook and run all cells
+                    v1
+                  </a>
+                  <a 
+                    href="https://colab.research.google.com/github/kushalshah0/Detecting-AI-Generated-Phishing-Emails-Using-BERT/blob/main/ai_generated_phishing_email_detection_FastAPI_v2.ipynb" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                  >
+                    v2
                   </a>
                 </li>
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium flex-shrink-0">2</span>
                   <span>Copy the generated tunnel HTTPS URL</span>
                 </li>
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-medium flex-shrink-0">3</span>
                   <span>Paste it in the field above</span>
                 </li>
