@@ -61,11 +61,11 @@ export function ShapAnalysis({ topTokens, label }: ShapAnalysisProps) {
                   ? `rgba(239, 68, 68, ${Math.min(Math.abs(token.shap_score) / maxScore + 0.2, 1)})`
                   : `rgba(34, 197, 94, ${Math.min(Math.abs(token.shap_score) / maxScore + 0.2, 1)})`,
               }}
-              title={`SHAP: ${token.shap_score.toFixed(4)}`}
+              title={`SHAP: ${token.shap_score.toFixed(6)}`}
             >
               {token.token}
               <span className="ml-1 opacity-60 text-[10px] dark:opacity-80">
-                {token.shap_score > 0 ? '+' : ''}{token.shap_score.toFixed(2)}
+                {token.shap_score > 0 ? '+' : ''}{token.shap_score.toFixed(4)}
               </span>
             </motion.span>
           );
